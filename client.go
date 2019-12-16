@@ -79,7 +79,6 @@ func (c *Client) Forecast(lat, long float64) (*Forecast, error) {
 	endpoint := c.url("/forecast")
 
 	endpoint = endpoint + "/" + c.Key + "/" + c.latlong(lat, long)
-	fmt.Println(endpoint)
 
 	req, err := http.NewRequest(http.MethodGet, endpoint, strings.NewReader(endpoint))
 
@@ -93,7 +92,8 @@ func (c *Client) Forecast(lat, long float64) (*Forecast, error) {
 		return nil, err
 	}
 	if res.StatusCode >= 400 {
-		return nil, parseError(body)
+		fmt.Println(res.StatusCode)
+		return nil, ErrBadRequest
 	}
 	var forecast Forecast
 	err = json.Unmarshal(body, &forecast)
@@ -103,11 +103,11 @@ func (c *Client) Forecast(lat, long float64) (*Forecast, error) {
 	return &forecast, nil
 }
 
-func parseError(data []byte) error {
-	var se Error
-	err := json.Unmarshal(data, &se)
-	if err != nil {
-		return err
-	}
-	return se
-}
+// func parseError(data []byte) error {
+// 	var se Error
+// 	err := json.Unmarshal(data, &se)
+// 	if err != nil {
+// 		return err
+// 	}
+// 	return se
+// }

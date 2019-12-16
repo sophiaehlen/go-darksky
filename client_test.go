@@ -2,7 +2,6 @@ package darksky_test
 
 import (
 	"flag"
-	"fmt"
 	"testing"
 
 	darksky "github.com/sophiaehlen/darksky-client"
@@ -20,19 +19,60 @@ func TestClient_Forecast(t *testing.T) {
 	if apiKey == "" {
 		t.Skip("No API key provided")
 	}
+
+	type checkFn func(*testing.T, *darksky.Forecast, error)
+	check := func(fns ...checkFn) []checkFn { return fns }
+
+	hasNoErr := func() checkFn {
+		return func(t *testing.T, fc *darksky.Forecast, err error) {
+			if err != nil {
+				t.Fatalf("err = %v; want nil", err)
+			}
+		}
+	}
+	hasLatitude := func(lat float64) checkFn {
+		return func(t *testing.T, fc *darksky.Forecast, err error) {
+			if fc.Latitude != lat {
+				t.Errorf("Latitude = %f; want %f", fc.Latitude, lat)
+			}
+		}
+	}
+	hasLongitude := func(long float64) checkFn {
+		return func(t *testing.T, fc *darksky.Forecast, err error) {
+			if fc.Longitude != long {
+				t.Errorf("Longitude = %f; want %f", fc.Longitude, long)
+			}
+		}
+	}
+	hasTemperature := func() checkFn {
+		return func(t *testing.T, fc *darksky.Forecast, err error) {
+			if fc.Currently.Temperature == 0.0 {
+				t.Errorf("Currently.Temperature = nil; want non-nil")
+			}
+		}
+	}
+
 	c := darksky.Client{
 		Key: apiKey,
 	}
-
-	lat := 32.589720
-	long := -116.466988
-
-	forecast, err := c.Forecast(lat, long)
-	if err != nil {
-		t.Errorf("Forecast() err = %v; want %v", err, nil)
+	tests := map[string]struct {
+		lat    float64
+		long   float64
+		checks []checkFn
+	}{
+		"valid forecast with correct coords": {
+			lat:    32.589720,
+			long:   -116.466988,
+			checks: check(hasNoErr(), hasLatitude(32.589720), hasLongitude(-116.466988), hasTemperature()),
+		},
 	}
-	if forecast == nil {
-		t.Fatalf("Forecast() = nil; want non-nil value")
+
+	for name, tc := range tests {
+		t.Run(name, func(t *testing.T) {
+			fc, err := c.Forecast(tc.lat, tc.long)
+			for _, check := range tc.checks {
+				check(t, fc, err)
+			}
+		})
 	}
-	fmt.Println(forecast)
 }
