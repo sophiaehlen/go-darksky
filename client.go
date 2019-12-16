@@ -92,7 +92,6 @@ func (c *Client) Forecast(lat, long float64) (*Forecast, error) {
 		return nil, err
 	}
 	if res.StatusCode >= 400 {
-		fmt.Println(res.StatusCode)
 		return nil, ErrBadRequest
 	}
 	var forecast Forecast
