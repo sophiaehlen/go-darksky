@@ -80,9 +80,6 @@ type Forecast struct {
 			SunriseTime                 int     `json:"sunriseTime"`
 			SunsetTime                  int     `json:"sunsetTime"`
 			MoonPhase                   float64 `json:"moonPhase"`
-			PrecipIntensity             float64 `json:"precipIntensity"`
-			PrecipIntensityMax          float64 `json:"precipIntensityMax"`
-			PrecipIntensityMaxTime      int     `json:"precipIntensityMaxTime"`
 			PrecipProbability           float64 `json:"precipProbability"`
 			PrecipType                  string  `json:"precipType"`
 			TemperatureHigh             float64 `json:"temperatureHigh"`
@@ -98,13 +95,8 @@ type Forecast struct {
 			Pressure                    float64 `json:"pressure"`
 			WindSpeed                   float64 `json:"windSpeed"`
 			WindGust                    float64 `json:"windGust"`
-			WindGustTime                int     `json:"windGustTime"`
-			WindBearing                 int     `json:"windBearing"`
 			CloudCover                  float64 `json:"cloudCover"`
 			UvIndex                     int     `json:"uvIndex"`
-			UvIndexTime                 int     `json:"uvIndexTime"`
-			Visibility                  int     `json:"visibility"`
-			Ozone                       float64 `json:"ozone"`
 			TemperatureMin              float64 `json:"temperatureMin"`
 			TemperatureMinTime          int     `json:"temperatureMinTime"`
 			TemperatureMax              float64 `json:"temperatureMax"`
