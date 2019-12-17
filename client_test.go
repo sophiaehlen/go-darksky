@@ -151,7 +151,7 @@ func TestClient_Forecast(t *testing.T) {
 			}
 		}
 	}
-	hasTemperature := func() checkFn {
+	hasCurrTemperature := func() checkFn {
 		return func(t *testing.T, fc *darksky.Forecast, err error) {
 			if fc.Currently.Temperature == 0.0 {
 				t.Errorf("Currently.Temperature = nil; want non-nil")
@@ -172,9 +172,13 @@ func TestClient_Forecast(t *testing.T) {
 		checks []checkFn
 	}{
 		"valid forecast with correct coords": {
-			lat:    32.589720,
-			long:   -116.466988,
-			checks: check(hasNoErr(), hasLatitude(32.589720), hasLongitude(-116.466988), hasTemperature()),
+			lat:  32.589720,
+			long: -116.466988,
+			checks: check(
+				hasNoErr(),
+				hasLatitude(32.589720),
+				hasLongitude(-116.466988),
+				hasCurrTemperature()),
 		},
 		"invalid latitude": {
 			lat:    132.0,

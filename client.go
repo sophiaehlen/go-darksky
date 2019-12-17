@@ -38,13 +38,6 @@ type Forecast struct {
 	Minutely struct {
 		Summary string `json:"summary"`
 		Icon    string `json:"icon"`
-		Data    []struct {
-			Time                 int     `json:"time"`
-			PrecipIntensity      float64 `json:"precipIntensity"`
-			PrecipIntensityError float64 `json:"precipIntensityError"`
-			PrecipProbability    float64 `json:"precipProbability"`
-			PrecipType           string  `json:"precipType"`
-		} `json:"data"`
 	} `json:"minutely"`
 	Hourly struct {
 		Summary string `json:"summary"`
