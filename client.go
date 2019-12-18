@@ -12,110 +12,31 @@ const (
 	DefaultBaseURL = "https://api.darksky.net"
 )
 
-type Forecast struct {
-	Latitude  float64 `json:"latitude"`
-	Longitude float64 `json:"longitude"`
-	Timezone  string  `json:"timezone"`
-	Currently struct {
-		Time                 int     `json:"time"`
-		Summary              string  `json:"summary"`
-		Icon                 string  `json:"icon"`
-		NearestStormDistance int     `json:"nearestStormDistance"`
-		PrecipIntensity      float64 `json:"precipIntensity"`
-		PrecipIntensityError float64 `json:"precipIntensityError"`
-		PrecipProbability    float64 `json:"precipProbability"`
-		PrecipType           string  `json:"precipType"`
-		Temperature          float64 `json:"temperature"`
-		ApparentTemperature  float64 `json:"apparentTemperature"` // "feels like temp in Fahrenheit"
-		DewPoint             float64 `json:"dewPoint"`
-		Humidity             float64 `json:"humidity"`
-		Pressure             float64 `json:"pressure"`
-		WindSpeed            float64 `json:"windSpeed"`
-		WindGust             float64 `json:"windGust"`
-		WindBearing          int     `json:"windBearing"`
-		CloudCover           float64 `json:"cloudCover"`
-	} `json:"currently"`
-	Minutely struct {
-		Summary string `json:"summary"`
-		Icon    string `json:"icon"`
-	} `json:"minutely"`
-	Hourly struct {
-		Summary string `json:"summary"`
-		Icon    string `json:"icon"`
-		Data    []struct {
-			Time                int     `json:"time"`
-			Summary             string  `json:"summary"`
-			Icon                string  `json:"icon"`
-			PrecipIntensity     float64 `json:"precipIntensity"`
-			PrecipProbability   float64 `json:"precipProbability"`
-			PrecipType          string  `json:"precipType"`
-			Temperature         float64 `json:"temperature"`
-			ApparentTemperature float64 `json:"apparentTemperature"`
-			DewPoint            float64 `json:"dewPoint"`
-			Humidity            float64 `json:"humidity"`
-			Pressure            float64 `json:"pressure"`
-			WindSpeed           float64 `json:"windSpeed"`
-			WindGust            float64 `json:"windGust"`
-			WindBearing         int     `json:"windBearing"`
-			CloudCover          float64 `json:"cloudCover"`
-			UvIndex             int     `json:"uvIndex"`
-			Visibility          float64 `json:"visibility"`
-			Ozone               float64 `json:"ozone"`
-		} `json:"data"`
-	} `json:"hourly"`
-	Daily struct {
-		Summary string `json:"summary"`
-		Icon    string `json:"icon"`
-		Data    []struct {
-			Time                        int     `json:"time"`
-			Summary                     string  `json:"summary"`
-			Icon                        string  `json:"icon"`
-			SunriseTime                 int     `json:"sunriseTime"`
-			SunsetTime                  int     `json:"sunsetTime"`
-			MoonPhase                   float64 `json:"moonPhase"`
-			PrecipProbability           float64 `json:"precipProbability"`
-			PrecipType                  string  `json:"precipType"`
-			TemperatureHigh             float64 `json:"temperatureHigh"`
-			TemperatureHighTime         int     `json:"temperatureHighTime"`
-			TemperatureLow              float64 `json:"temperatureLow"`
-			TemperatureLowTime          int     `json:"temperatureLowTime"`
-			ApparentTemperatureHigh     float64 `json:"apparentTemperatureHigh"`
-			ApparentTemperatureHighTime int     `json:"apparentTemperatureHighTime"`
-			ApparentTemperatureLow      float64 `json:"apparentTemperatureLow"`
-			ApparentTemperatureLowTime  int     `json:"apparentTemperatureLowTime"`
-			DewPoint                    float64 `json:"dewPoint"`
-			Humidity                    float64 `json:"humidity"`
-			Pressure                    float64 `json:"pressure"`
-			WindSpeed                   float64 `json:"windSpeed"`
-			WindGust                    float64 `json:"windGust"`
-			CloudCover                  float64 `json:"cloudCover"`
-			UvIndex                     int     `json:"uvIndex"`
-			TemperatureMin              float64 `json:"temperatureMin"`
-			TemperatureMinTime          int     `json:"temperatureMinTime"`
-			TemperatureMax              float64 `json:"temperatureMax"`
-			TemperatureMaxTime          int     `json:"temperatureMaxTime"`
-			ApparentTemperatureMin      float64 `json:"apparentTemperatureMin"`
-			ApparentTemperatureMinTime  int     `json:"apparentTemperatureMinTime"`
-			ApparentTemperatureMax      float64 `json:"apparentTemperatureMax"`
-			ApparentTemperatureMaxTime  int     `json:"apparentTemperatureMaxTime"`
-		} `json:"data"`
-	} `json:"daily"`
-	Alerts []struct {
-		Title       string `json:"title"`
-		Time        int    `json:"time"`
-		Expires     int    `json:"expires"`
-		Description string `json:"description"`
-		URI         string `json:"uri"`
-	} `json:"alerts"`
-}
-
 type Client struct {
 	Key        string
 	BaseURL    string
 	HttpClient interface {
 		Do(*http.Request) (*http.Response, error)
 	}
+
+	// Services for different endpoints of the Dark Sky API
+	ForecastS *ForecastService
 }
+
+type httpClient interface {
+	Do(*http.Request) (*http.Response, error)
+}
+
+// func NewClient(key string) *Client {
+
+// 	c := &Client{
+// 		Key:     key,
+// 		BaseURL: DefaultBaseURL,
+// 		Client:  http.DefaultClient,
+// 	}
+// 	c.ForecastS = &ForecastService{client: c}
+// 	return c
+// }
 
 func (c *Client) do(req *http.Request) (*http.Response, error) {
 	httpClient := c.HttpClient
@@ -142,9 +63,7 @@ func (c *Client) latlong(lat, long float64) string {
 
 func (c *Client) Forecast(lat, long float64) (*Forecast, error) {
 	endpoint := c.url("/forecast")
-
 	endpoint = endpoint + "/" + c.Key + "/" + c.latlong(lat, long)
-
 	req, err := http.NewRequest(http.MethodGet, endpoint, strings.NewReader(endpoint))
 
 	res, err := c.do(req)

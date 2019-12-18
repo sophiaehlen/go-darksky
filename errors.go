@@ -3,7 +3,13 @@ package darksky
 import "errors"
 
 var (
+	// ErrBadRequest is returned when the API server returns a
+	// status code that is >= 400
 	ErrBadRequest = errors.New("Bad HTTP Request")
+
+	// ErrUnableToLoadTimezone is returned when the timezone information
+	// cannot be loaded or parsed from the Forecast
+	ErrUnableToLoadTimezone = errors.New("Unable to Load Timezone Data")
 )
 
 // type Error struct {
